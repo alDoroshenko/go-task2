@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"sort"
 )
 
 type User struct {
@@ -13,6 +14,9 @@ type User struct {
 func (u *User) Age() int {
 	return u.age
 }
+func (u *User) Name() string {
+	return u.name
+}
 
 func NewUser(name string, age int) *User {
 	return &User{name: name, age: age}
@@ -21,16 +25,17 @@ func NewUser(name string, age int) *User {
 func main() {
 	source := inUsers()
 	lim := inLimit()
-	target := filter(source, lim)
+	targetBigger, targetLess := filter(source, lim)
 	fmt.Println("Source: ", source)
-	fmt.Println("Target: ", target)
+	fmt.Println("TargetBigger: ", targetBigger)
+	fmt.Println("targetLess: ", targetLess)
 
 }
 
 func inUsers() []User {
 	var name string
 	var age int
-	var users []User
+	users := make([]User, 0, 10)
 	fmt.Println("Введите имя и возраст пользователя через пробел, по окончании ввода введите exit:  ")
 	for {
 		_, err := fmt.Scanln(&name, &age)
@@ -59,12 +64,22 @@ func inLimit() int {
 	return val
 }
 
-func filter(users []User, lim int) []User {
-	var res []User
+func filter(users []User, lim int) ([]User, []User) {
+	resLess := make([]User, 0, len(users))
+	resBigger := make([]User, 0, len(users))
+
 	for _, user := range users {
 		if user.Age() > lim {
-			res = append(res, user)
+			resBigger = append(resBigger, user)
+		} else {
+			resLess = append(resLess, user)
 		}
 	}
-	return res
+	sort.Slice(resBigger, func(i, j int) bool {
+		return resBigger[i].Name() < resBigger[j].Name()
+	})
+	sort.Slice(resLess, func(i, j int) bool {
+		return resLess[i].Name() < resLess[j].Name()
+	})
+	return resBigger, resLess
 }
